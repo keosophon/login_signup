@@ -1,12 +1,16 @@
 import React from 'react';
 
-const Login = () => {
+const SignUp = () => {
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100 w-100">
       <div className="card shadow-sm w-30">
         <div className="card-body">
-          <h3 className="card-title text-center mb-4">Login</h3>
+          <h3 className="card-title text-center mb-4">Sign Up</h3>
           <form>
+          <div className="mb-3">
+              <label htmlFor="name" className="form-label">name</label>
+              <input type="text" className="form-control" id="name"/>
+            </div>
             <div className="mb-3">
               <label htmlFor="email" className="form-label">Email address</label>
               <input type="email" className="form-control" id="email" aria-describedby="emailHelp" />
@@ -20,7 +24,7 @@ const Login = () => {
               <button type="submit" className="btn btn-primary mb-3">Submit</button>
             </div>
             <p className="text-center mb-1">You agree to our <a href="/terms">terms and conditions</a>.</p>
-            <p className="text-center">Don't have an account? <a href="/signup">Signup</a></p>
+            <p className="text-center">Already have an account? <a href="/">Log In</a></p>
           </form>
         </div>
       </div>
@@ -28,4 +32,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;
