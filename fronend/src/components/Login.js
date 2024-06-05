@@ -1,10 +1,15 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [userInput, setUserInput] = useState({
     email: "",
     password: "",
   });
+  const [error, setError] = useState(null);
+
+  const navigator = useNavigate();
 
   const handleUserInput = (event) => {
     const { name, value } = event.target;
@@ -13,7 +18,15 @@ const Login = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(userInput);
+    setError(null);
+    axios
+      .post("http://localhost:8000/login", userInput)
+      .then((results) => {
+        navigator("/home");
+      })
+      .catch((err) => {
+        setError("Login failed. Please check your credentials and try again.");
+      });
   };
 
   return (
@@ -34,6 +47,7 @@ const Login = () => {
                 aria-describedby="emailHelp"
                 value={userInput.email}
                 onChange={handleUserInput}
+                required
               />
               <div id="emailHelp" className="form-text">
                 We'll never share your email with anyone else.
@@ -50,8 +64,10 @@ const Login = () => {
                 name="password"
                 value={userInput.password}
                 onChange={handleUserInput}
+                required
               />
             </div>
+            {error && <div className="alert alert-danger">{error}</div>}
             <div className="d-grid">
               <button type="submit" className="btn btn-primary mb-3">
                 Submit
