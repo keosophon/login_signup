@@ -26,15 +26,25 @@ mysqlConnection.connect((err) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const sql = "SELECT * FROM employee WHERE email = ? AND password = ?";
-  mysqlConnection.query(sql, [email, password], (error, results) => {
+  const sql = "SELECT * FROM employee WHERE email = ?";
+  mysqlConnection.query(sql, [email], (error, results) => {
     if (error) {
       console.error("Error executing query:", error);
       res.status(500).json({ error: "Internal server error" });
     } else if (results.length === 0) {
       res.status(401).json({ error: "Invalid email or password" });
     } else {
-      res.status(200).json({ message: "Login successful" });
+      const user = results[0];
+      bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          console.error("Error comparing passwords:", err);
+          res.status(500).json({ error: "Internal server error" });
+        } else if (!isMatch) {
+          res.status(401).json({ error: "Invalid email or password" });
+        } else {
+          res.status(200).json({ message: "Login successful" });
+        }
+      });
     }
   });
 });
