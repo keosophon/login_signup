@@ -37,6 +37,19 @@ app.post("/login", (req, res) => {
   });
 });
 
+app.post("/signup", (req, res) => {
+  const { name, email, password } = req.body;
+  const sql = "INSERT INTO employee (name, email, password) VALUES (?, ?, ?)";
+  mysqlConnection.query(sql, [name, email, password], (error, results) => {
+    if (error) {
+      console.error("Error executing query:", error);
+      res.status(500).json({ error: "Internal server error" });
+    } else {
+      res.status(200).json({ message: "Signup successful" });
+    }
+  });
+});
+
 app.listen("8000", () => {
   console.log("server is running");
 });
