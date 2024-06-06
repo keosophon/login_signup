@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
+const bcrypt = require("bcryptjs");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -39,13 +41,23 @@ app.post("/login", (req, res) => {
 
 app.post("/signup", (req, res) => {
   const { name, email, password } = req.body;
-  const sql = "INSERT INTO employee (name, email, password) VALUES (?, ?, ?)";
-  mysqlConnection.query(sql, [name, email, password], (error, results) => {
-    if (error) {
-      console.error("Error executing query:", error);
+  const saltRounds = 10;
+
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.error("Error hashing password:", err);
       res.status(500).json({ error: "Internal server error" });
     } else {
-      res.status(200).json({ message: "Signup successful" });
+      const sql =
+        "INSERT INTO employee (name, email, password) VALUES (?, ?, ?)";
+      mysqlConnection.query(sql, [name, email, hash], (error, results) => {
+        if (error) {
+          console.error("Error executing query:", error);
+          res.status(500).json({ error: "Internal server error" });
+        } else {
+          res.status(200).json({ message: "Signup successful" });
+        }
+      });
     }
   });
 });
