@@ -28,7 +28,13 @@ const Login = () => {
         navigator("/home");
       })
       .catch((err) => {
-        setError("Login failed. Please check your credentials and try again.");
+        if (err.response && err.response.status === 400) {
+          setError("Login failed! " + err.response.data.errors[0].msg);
+        } else {
+          setError(
+            "Login failed. Please check your credentials and try again."
+          );
+        }
       });
   };
 

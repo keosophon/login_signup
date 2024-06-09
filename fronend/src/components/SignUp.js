@@ -32,7 +32,11 @@ const SignUp = () => {
         navigator("/login");
       })
       .catch((err) => {
-        setError("Signup failed! Internal Server Error");
+        if (err.response && err.response.status === 400) {
+          setError("Singup failed! " + err.response.data.errors[0].msg);
+        } else {
+          setError("Signup failed! Internal Server Error");
+        }
       });
   };
 
