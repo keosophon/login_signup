@@ -25,6 +25,7 @@ const Login = () => {
     axios
       .post("http://localhost:8000/login", userInput)
       .then((results) => {
+        localStorage.setItem("token", results.data.token);
         navigator("/home");
       })
       .catch((err) => {
