@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const cors = require("cors");
@@ -14,6 +15,7 @@ const dbHost = process.env.DB_HOST;
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASSWORD;
 const dbName = process.env.DB_NAME;
+const myjwtkey = process.env.JWT_SECRET;
 
 const mysqlConnection = mysql.createConnection({
   host: dbHost,
@@ -63,7 +65,12 @@ app.post(
           } else if (!isMatch) {
             res.status(401).json({ error: "Invalid email or password" });
           } else {
-            res.status(200).json({ message: "Login successful" });
+            const token = jwt.sign(
+              { id: user.id, name: user.name, email: user.email },
+              myjwtkey,
+              { expiresIn: "1h" }
+            );
+            res.status(200).json({ isLogin: true, token, user });
           }
         });
       }
@@ -113,6 +120,18 @@ app.post(
     });
   }
 );
+
+app.get("/home", (req, res) => {
+  const token = req.headers["authorization"];
+  console.log("token", token);
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  jwt.verify(token, myjwtkey, (err, decoded) => {
+    if (err) return res.status(401).json({ error: "Invalid token" });
+    res.status(200).json({ decoded });
+  });
+});
 
 app.listen("8000", () => {
   console.log("server is running");
