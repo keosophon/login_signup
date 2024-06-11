@@ -7,4 +7,4 @@ Followings are some security measures that are used in the code:
 3. Password hashing (bcryptjs)
 4. login limiter (express-rate-limit)
 5. SQL inject prevention (parameterized queries)
-6. More to come:....
+6. Authorization (Jason Web Token "JWT")
