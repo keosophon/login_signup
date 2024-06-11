@@ -121,9 +121,9 @@ app.post(
   }
 );
 
-app.get("/home", (req, res) => {
+app.get("/checkAuth", (req, res) => {
   const token = req.headers["authorization"];
-  console.log("token", token);
+  //console.log("token", token);
   if (!token) {
     return res.status(401).json({ error: "Unauthorized" });
   }
