@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import validatePassword from "./PasswordValidator";
+//import validatePassword from "./PasswordValidator";
 
 const Login = () => {
   const [userInput, setUserInput] = useState({
@@ -9,7 +9,7 @@ const Login = () => {
     password: "",
   });
   const [error, setError] = useState(null);
-  const [passwordError, setPasswordError] = useState(null);
+  //const [passwordError, setPasswordError] = useState(null);
 
   const navigator = useNavigate();
 
@@ -21,7 +21,7 @@ const Login = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     setError(null);
-    setPasswordError(validatePassword(userInput.password));
+    //setPasswordError(validatePassword(userInput.password));
     axios
       .post("http://localhost:8000/login", userInput)
       .then((results) => {
@@ -30,13 +30,11 @@ const Login = () => {
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {
-          setError("Login failed! " + err.response.data.errors[0].msg);
+          setError(err.response.data.errors[0].msg);
         } else if (err.response && err.response.status === 429) {
           setError(err.response.data);
         } else {
-          setError(
-            "Login failed. Please check your credentials and try again."
-          );
+          setError(err.response.data.error);
         }
       });
   };
@@ -79,12 +77,12 @@ const Login = () => {
                 required
               />
             </div>
-
-            {passwordError ? (
+            {/*{passwordError ? (
               <div className="alert alert-danger">{passwordError}</div>
             ) : (
               error && <div className="alert alert-danger">{error}</div>
-            )}
+            )}*/}
+            {error && <div className="alert alert-danger">{error}</div>}
             <div className="d-grid">
               <button type="submit" className="btn btn-primary mb-3">
                 Submit

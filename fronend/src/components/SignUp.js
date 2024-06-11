@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import validatePassword from "./PasswordValidator";
+//import validatePassword from "./PasswordValidator";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -13,7 +13,7 @@ const SignUp = () => {
   const navigator = useNavigate();
 
   const [error, setError] = useState(null);
-  const [passwordError, setPasswordError] = useState(null);
+  //const [passwordError, setPasswordError] = useState(null);
 
   const handleUserInput = (event) => {
     setUserInput((prev) => ({
@@ -25,7 +25,7 @@ const SignUp = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     setError(null);
-    setPasswordError(validatePassword(userInput.password));
+    //setPasswordError(validatePassword(userInput.password));
     axios
       .post("http://localhost:8000/signup", userInput)
       .then((results) => {
@@ -33,9 +33,9 @@ const SignUp = () => {
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {
-          setError("Singup failed! " + err.response.data.errors[0].msg);
+          setError(err.response.data.errors[0].msg);
         } else {
-          setError("Signup failed! Internal Server Error");
+          setError(err.response.data.error);
         }
       });
   };
@@ -92,12 +92,14 @@ const SignUp = () => {
                 required
               />
             </div>
+            {/*
             {passwordError ? (
               <div className="alert alert-danger">{passwordError}</div>
             ) : (
               error && <div className="alert alert-danger">{error}</div>
             )}
-
+            */}
+            {error && <div className="alert alert-danger">{error}</div>}
             <div className="d-grid">
               <button type="submit" className="btn btn-primary mb-3">
                 Submit
