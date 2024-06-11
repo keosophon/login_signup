@@ -43,93 +43,101 @@ const loginLimiter = rateLimit({
     "Too many login attempts from this IP, please try again after 15 minutes",
 });
 
-app.post(
-  "/login",
-  loginLimiter,
-  [
-    body("email").isEmail().withMessage("Enter a valid email"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters long"),
-  ],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+const passwordMessage =
+  "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one symbol, and one digit.";
 
-    const { email, password } = req.body;
-    const sql = "SELECT * FROM employee WHERE email = ?";
-    mysqlConnection.query(sql, [email], (error, results) => {
-      if (error) {
-        console.error("Error executing query:", error);
-        res.status(500).json({ error: "Internal server error" });
-      } else if (results.length === 0) {
-        res.status(401).json({ error: "Invalid email or password" });
-      } else {
-        const user = results[0];
-        bcrypt.compare(password, user.password, (err, isMatch) => {
-          if (err) {
-            console.error("Error comparing passwords:", err);
-            res.status(500).json({ error: "Internal server error" });
-          } else if (!isMatch) {
-            res.status(401).json({ error: "Invalid email or password" });
-          } else {
-            const token = jwt.sign(
-              { id: user.id, name: user.name, email: user.email },
-              myjwtkey,
-              { expiresIn: "1h" }
-            );
-            res.status(200).json({ isLogin: true, token, user });
-          }
-        });
-      }
-    });
+// login validation middleware
+const loginValidator = [
+  body("email")
+    .isEmail()
+    .withMessage("Your email is invalid. Please input again!"),
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage(passwordMessage)
+    .matches(/[A-Z]/)
+    .withMessage(passwordMessage)
+    .matches(/[a-z]/)
+    .withMessage(passwordMessage)
+    .matches(/[0-9]/)
+    .withMessage(passwordMessage)
+    .matches(/[^A-Za-z0-9]/)
+    .withMessage(passwordMessage),
+];
+
+app.post("/login", loginLimiter, loginValidator, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-);
 
-app.post(
-  "/signup",
-  [
-    body("name")
-      .not()
-      .isEmpty()
-      .trim()
-      .escape()
-      .withMessage("Name is required"),
-    body("email").isEmail().withMessage("Enter a valid email"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters long"),
-  ],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+  const { email, password } = req.body;
+  const sql = "SELECT * FROM employee WHERE email = ?";
+  mysqlConnection.query(sql, [email], (error, results) => {
+    if (error) {
+      console.error("Error executing query:", error);
+      res.status(500).json({ error: "Internal server error" });
+    } else if (results.length === 0) {
+      res.status(401).json({ error: "Your email or password is incorrect!" });
+    } else {
+      const user = results[0];
+      bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          console.error("Error comparing passwords:", err);
+          res.status(500).json({ error: "Internal server error" });
+        } else if (!isMatch) {
+          res
+            .status(401)
+            .json({ error: "Your email or password is incorrect!" });
+        } else {
+          const token = jwt.sign(
+            { id: user.id, name: user.name, email: user.email },
+            myjwtkey,
+            { expiresIn: "1h" }
+          );
+          res.status(200).json({ isLogin: true, token, user });
+        }
+      });
     }
+  });
+});
 
-    const { name, email, password } = req.body;
-    const saltRounds = 10;
+// singUp validation middleware
+const signupValidator = [
+  body("name").not().isEmpty().trim().escape().withMessage("Name is required"),
+  ...loginValidator,
+];
 
-    bcrypt.hash(password, saltRounds, (err, hash) => {
-      if (err) {
-        console.error("Error hashing password:", err);
-        res.status(500).json({ error: "Internal server error" });
-      } else {
-        const sql =
-          "INSERT INTO employee (name, email, password) VALUES (?, ?, ?)";
-        mysqlConnection.query(sql, [name, email, hash], (error, results) => {
-          if (error) {
-            console.error("Error executing query:", error);
-            res.status(500).json({ error: "Internal server error" });
-          } else {
-            res.status(200).json({ message: "Signup successful" });
-          }
-        });
-      }
-    });
+app.post("/signup", signupValidator, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-);
+
+  const { name, email, password } = req.body;
+  const saltRounds = 10;
+
+  // Hash the password
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.error("Error hashing password:", err);
+      res.status(500).json({ error: "Sign up failed. Internal server error" });
+    } else {
+      // Prevent SQL injection using parameterized queries
+      const sql =
+        "INSERT INTO employee (name, email, password) VALUES (?, ?, ?)";
+      mysqlConnection.query(sql, [name, email, hash], (error, results) => {
+        if (error) {
+          console.error("Error executing query:", error);
+          res
+            .status(500)
+            .json({ error: "Sign up failed. Internal server error" });
+        } else {
+          res.status(200).json({ message: "Signup successful" });
+        }
+      });
+    }
+  });
+});
 
 app.get("/checkAuth", (req, res) => {
   const token = req.headers["authorization"];
