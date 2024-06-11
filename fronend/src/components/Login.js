@@ -31,6 +31,8 @@ const Login = () => {
       .catch((err) => {
         if (err.response && err.response.status === 400) {
           setError("Login failed! " + err.response.data.errors[0].msg);
+        } else if (err.response && err.response.status === 429) {
+          setError(err.response.data);
         } else {
           setError(
             "Login failed. Please check your credentials and try again."

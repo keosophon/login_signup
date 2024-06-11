@@ -91,12 +91,13 @@ const SignUp = () => {
                 onChange={handleUserInput}
                 required
               />
-              {passwordError ? (
-                <div className="alert alert-danger">{passwordError}</div>
-              ) : (
-                error && <div className="alert alert-danger">{error}</div>
-              )}
             </div>
+            {passwordError ? (
+              <div className="alert alert-danger">{passwordError}</div>
+            ) : (
+              error && <div className="alert alert-danger">{error}</div>
+            )}
+
             <div className="d-grid">
               <button type="submit" className="btn btn-primary mb-3">
                 Submit

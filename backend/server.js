@@ -6,6 +6,7 @@ const { body, validationResult } = require("express-validator");
 const cors = require("cors");
 const mysql = require("mysql2");
 const bcrypt = require("bcryptjs");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 app.use(cors());
@@ -34,8 +35,17 @@ mysqlConnection.connect((err) => {
   );
 });
 
+// Rate limiting middleware
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 3, // Limit each IP to 3 login requests per windowMs
+  message:
+    "Too many login attempts from this IP, please try again after 15 minutes",
+});
+
 app.post(
   "/login",
+  loginLimiter,
   [
     body("email").isEmail().withMessage("Enter a valid email"),
     body("password")
