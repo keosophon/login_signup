@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import React from "react";
 import axios from "axios";
 
@@ -27,13 +28,20 @@ function Home() {
           <div>
             <h3 style={{ textAlign: "center", color: "white" }}>
               Access Denied!
-              <p>Login First</p>
+              <p>
+                Please <a href="./login">Login</a> First
+              </p>
             </h3>
           </div>
         ) : (
           <div>
             <h3 style={{ textAlign: "center", color: "white" }}>
-              Welcome {user.name}
+              Welcome {user.name}. Your email is {user.email}
+              <p>
+                <Link to="/login" onClick={() => localStorage.clear()}>
+                  Logout
+                </Link>
+              </p>
             </h3>
           </div>
         )}
