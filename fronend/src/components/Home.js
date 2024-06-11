@@ -8,7 +8,7 @@ function Home() {
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:8000/home", {
+      const res = await axios.get("http://localhost:8000/checkAuth", {
         headers: { Authorization: token },
       });
       setUser(res.data.decoded);
@@ -23,7 +23,6 @@ function Home() {
   return (
     <div>
       <div>
-        {console.log("user", user)}
         {!user ? (
           <div>
             <h3 style={{ textAlign: "center", color: "white" }}>
