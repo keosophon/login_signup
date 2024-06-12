@@ -40,7 +40,7 @@ const Login = () => {
         } else if (err.response && err.response.status === 429) {
           setError(err.response.data);
         } else {
-          setError(err.response);
+          setError(err.response.data.error);
         }
       });
   };
