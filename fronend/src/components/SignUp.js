@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 //import validatePassword from "./PasswordValidator";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -12,8 +12,15 @@ const SignUp = () => {
 
   const navigator = useNavigate();
 
+  const inputNameRef = useRef(null);
+
   const [error, setError] = useState(null);
   //const [passwordError, setPasswordError] = useState(null);
+
+  useEffect(() => {
+    // Focus the input name element when the component mounts
+    inputNameRef.current.focus();
+  }, []);
 
   const handleUserInput = (event) => {
     setUserInput((prev) => ({
@@ -48,7 +55,7 @@ const SignUp = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="name" className="form-label">
-                name
+                Full name
               </label>
               <input
                 type="text"
@@ -57,6 +64,7 @@ const SignUp = () => {
                 name="name"
                 value={userInput.name}
                 onChange={handleUserInput}
+                ref={inputNameRef}
                 required
               />
             </div>

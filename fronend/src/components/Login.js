@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 //import validatePassword from "./PasswordValidator";
@@ -12,6 +12,12 @@ const Login = () => {
   //const [passwordError, setPasswordError] = useState(null);
 
   const navigator = useNavigate();
+  const inputEmailRef = useRef(null);
+
+  useEffect(() => {
+    // Focus the input element when the component mounts
+    inputEmailRef.current.focus();
+  }, []);
 
   const handleUserInput = (event) => {
     const { name, value } = event.target;
@@ -57,6 +63,7 @@ const Login = () => {
                 aria-describedby="emailHelp"
                 value={userInput.email}
                 onChange={handleUserInput}
+                ref={inputEmailRef}
                 required
               />
               <div id="emailHelp" className="form-text">
