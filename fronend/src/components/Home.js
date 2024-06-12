@@ -9,7 +9,7 @@ function Home() {
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:8000/checkAuth", {
+      const res = await axios.get("https://localhost:8000/checkAuth", {
         headers: { Authorization: token },
       });
       setUser(res.data.decoded);

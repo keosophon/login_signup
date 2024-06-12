@@ -34,7 +34,7 @@ const SignUp = () => {
     setError(null);
     //setPasswordError(validatePassword(userInput.password));
     axios
-      .post("http://localhost:8000/signup", userInput)
+      .post("https://localhost:8000/signup", userInput)
       .then((results) => {
         navigator("/login");
       })

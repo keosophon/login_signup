@@ -29,7 +29,7 @@ const Login = () => {
     setError(null);
     //setPasswordError(validatePassword(userInput.password));
     axios
-      .post("http://localhost:8000/login", userInput)
+      .post("https://localhost:8000/login", userInput)
       .then((results) => {
         localStorage.setItem("token", results.data.token);
         navigator("/home");
@@ -40,7 +40,7 @@ const Login = () => {
         } else if (err.response && err.response.status === 429) {
           setError(err.response.data);
         } else {
-          setError(err.response.data.error);
+          setError(err.response);
         }
       });
   };
