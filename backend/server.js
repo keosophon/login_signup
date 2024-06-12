@@ -1,14 +1,19 @@
 require("dotenv").config();
 
-const jwt = require("jsonwebtoken");
 const express = require("express");
+const helmet = require("helmet");
 const { body, validationResult } = require("express-validator");
 const cors = require("cors");
 const mysql = require("mysql2");
 const bcrypt = require("bcryptjs");
 const rateLimit = require("express-rate-limit");
+const fs = require("fs");
+const https = require("https");
+const jwt = require("jsonwebtoken");
 
 const app = express();
+// Use Helmet to secure the app
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
@@ -150,6 +155,17 @@ app.get("/checkAuth", (req, res) => {
   });
 });
 
+// options for https server
+const options = {
+  key: fs.readFileSync("key.pem"),
+  cert: fs.readFileSync("cert.pem"),
+};
+
+/*
 app.listen("8000", () => {
   console.log("server is running");
+});
+*/
+https.createServer(options, app).listen(8000, () => {
+  console.log("Server is running on port 8000");
 });
