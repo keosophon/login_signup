@@ -13,21 +13,33 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 // Use Helmet to secure the app
-app.use(helmet());
-app.use(cors());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    referrerPolicy: { policy: "no-referrer" },
+  })
+);
+app.use(
+  cors({
+    origin: ["https://localhost:3000"], // Restrict to only trusted origins
+  })
+);
+
 app.use(express.json());
 
-const dbHost = process.env.DB_HOST;
-const dbUser = process.env.DB_USER;
-const dbPassword = process.env.DB_PASSWORD;
-const dbName = process.env.DB_NAME;
-const myjwtkey = process.env.JWT_SECRET;
-
 const mysqlConnection = mysql.createConnection({
-  host: dbHost,
-  user: dbUser,
-  password: dbPassword,
-  database: dbName,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 mysqlConnection.connect((err) => {
@@ -96,7 +108,7 @@ app.post("/login", loginLimiter, loginValidator, (req, res) => {
         } else {
           const token = jwt.sign(
             { id: user.id, name: user.name, email: user.email },
-            myjwtkey,
+            process.env.JWT_SECRET,
             { expiresIn: "1h" }
           );
           res.status(200).json({ isLogin: true, token, user });
@@ -112,7 +124,7 @@ const signupValidator = [
   ...loginValidator,
 ];
 
-app.post("/signup", signupValidator, (req, res) => {
+app.post("/signup", loginLimiter, signupValidator, (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -149,7 +161,7 @@ app.get("/checkAuth", (req, res) => {
   if (!token) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  jwt.verify(token, myjwtkey, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: "Invalid token" });
     res.status(200).json({ decoded });
   });
@@ -157,8 +169,8 @@ app.get("/checkAuth", (req, res) => {
 
 // options for https server
 const options = {
-  key: fs.readFileSync("key.pem"),
-  cert: fs.readFileSync("cert.pem"),
+  key: fs.readFileSync(process.env.PATH_TO_KEY),
+  cert: fs.readFileSync(process.env.PATH_TO_CERT),
 };
 
 /*
